@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KML/KMZ to CSV Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">KML/KMZ to CSV Converter</h1>
+            <p class="text-gray-600">Convert your KML or KMZ files to CSV format with ease</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+                <!-- File Upload Section -->
+                <div class="p-8 border-b border-gray-100">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Upload Your File</h2>
+                    
+                    <div id="dropZone" class="border-2 border-dashed border-primary-300 rounded-lg p-8 text-center transition-all hover:border-primary-400 hover:bg-primary-50">
+                        <div class="space-y-4">
+                            <div class="w-16 h-16 mx-auto bg-primary-100 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-lg text-gray-700 mb-2">Drop your KML/KMZ file here</p>
+                                <p class="text-gray-500 text-sm">or</p>
+                            </div>
+                            <button id="browseBtn" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                Browse Files
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="fileInput" accept=".kml,.kmz" multiple class="hidden">
+                    
+                    <div class="mt-4 text-center">
+                        <p class="text-sm text-gray-500">Supported formats: .kml, .kmz</p>
+                    </div>
+                </div>
+
+                <!-- Processing Status -->
+                <div id="processingStatus" class="hidden p-6 bg-blue-50 border-b border-gray-100">
+                    <div class="flex items-center justify-center space-x-2">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
+                        <span class="text-gray-700">Processing your file...</span>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="hidden p-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Conversion Results</h2>
+                    
+                    <div id="filesList" class="space-y-4">
+                        <!-- Results will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Error Section -->
+                <div id="errorSection" class="hidden p-6 bg-red-50 border-b border-gray-100">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Error</h3>
+                            <p id="errorMessage" class="mt-1 text-sm text-red-700"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Section -->
+                <div class="p-8 bg-gray-50">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">How it works</h3>
+                    <div class="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
+                        <div class="text-center">
+                            <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <span class="text-primary-600 font-bold">1</span>
+                            </div>
+                            <p>Upload your KML/KMZ file</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <span class="text-primary-600 font-bold">2</span>
+                            </div>
+                            <p>Extract placemarks data</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <span class="text-primary-600 font-bold">3</span>
+                            </div>
+                            <p>Download as CSV</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
