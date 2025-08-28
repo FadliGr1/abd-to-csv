@@ -185,6 +185,17 @@ class KMLConverter {
                 }
             }
 
+            // Get original coordinates from the placemark's Point
+            const point = placemark.getElementsByTagName('Point')[0];
+            if (point) {
+                const coordinates = point.getElementsByTagName('coordinates')[0];
+                if (coordinates) {
+                    const [longitude, latitude] = coordinates.textContent.trim().split(',');
+                    row['BUILDING_LONGITUDE'] = longitude || '';
+                    row['BUILDING_LATITUDE'] = latitude || '';
+                }
+            }
+
             // Create row array in the exact order of headers
             const rowArray = headerArray.map(header => row[header] || '');
             csvData.push(rowArray);
